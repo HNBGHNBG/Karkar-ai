@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fbf5ed" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0c1110" media="(prefers-color-scheme: dark)">
+    <meta name="robots" content="noindex,nofollow">
+    <title>تسجيل دخول المسؤول | Teacher Karkar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="تصميم بدون عنوان.png">
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('mk-theme');
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      .admin-wrap { width: min(620px, calc(100% - 32px)); margin: 45px auto 80px; }
+      .admin-card { padding: 32px; border: 1px solid var(--line); border-radius: var(--radius-xl); background: var(--surface-solid); box-shadow: var(--shadow-lg); }
+      .admin-card h1 { margin: 8px 0; font-size: 26px; font-weight: 600; color: var(--ink); }
+      .admin-card p { color: var(--muted); font-size: 13px; line-height: 1.9; }
+      .admin-status, .admin-message { margin: 18px 0; padding: 14px; border-radius: var(--radius); color: var(--green-dark); background: var(--green-tint); font-size: 13px; line-height: 1.8; }
+      .admin-status[data-state="error"], .admin-message { color: var(--danger-text); background: var(--danger-bg); }
+      .admin-message:empty { display: none; }
+      .admin-warning { padding: 14px; border-inline-start: 3px solid var(--warn-accent); background: var(--warn-bg); color: var(--warn-text) !important; border-radius: 0 var(--radius) var(--radius) 0; }
+      .setup-guide { margin: 20px 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-muted); }
+      .setup-guide summary { padding: 14px 16px; color: var(--ink); font-size: 13px; font-weight: 600; cursor: pointer; }
+      .setup-guide ol { margin: 0; padding: 0 32px 16px 16px; color: var(--muted); font-size: 12px; line-height: 2; }
+      .setup-guide code { direction: ltr; unicode-bidi: embed; overflow-wrap: anywhere; background: var(--surface-solid); padding: 2px 6px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <div class="ambient-orbs" aria-hidden="true">
+      <span class="orb-one"></span>
+      <span class="orb-two"></span>
+      <span class="orb-three"></span>
+    </div>
+    
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark"><img src="تصميم بدون عنوان.png" alt="" aria-hidden="true"></span>
+        <span class="brand-copy"><strong>Teacher Karkar</strong></span>
+      </a>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="تبديل المظهر">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <a class="account-button" href="/">← العودة للموقع</a>
+      </div>
+    </header>
+    
+    <main class="admin-wrap">
+      <section class="admin-card">
+        <span class="form-step-label">مساحة المسؤول</span>
+        <h1>تسجيل دخول المسؤول</h1>
+        <p>سجّل الدخول بحساب Workspace المحدد لإدارة اتصال Google Drive وربط الموقع.</p>
+        
+        <div class="admin-status" id="setup-status" role="status">جارٍ التحقق من إعداد الربط...</div>
+        
+        <p class="admin-warning">يتطلب هذا الاتصال صلاحية Drive لحساب المسؤول بهدف إنشاء مجلدات الطلبات ورفع المرفقات.</p>
+        
+        <details class="setup-guide">
+          <summary>خطوات إعداد Google OAuth لأول مرة</summary>
+          <ol>
+            <li>أنشئ مشروعًا وفعّل Google Drive API.</li>
+            <li>أكمل إعداد شاشة موافقة OAuth وأضف بريد المسؤول ضمن المستخدمين التجريبيين عند الحاجة.</li>
+            <li>أنشئ OAuth Client من نوع Web application وأضف عنوان الرجوع المحدد.</li>
+            <li>ضع بيانات OAuth وبريد المسؤول في ملف <code>.env</code> محليًا. لا ترسل السر في المحادثة.</li>
+            <li>امنح بريد المسؤول صلاحية محرر على مجلد Drive الخاص.</li>
+            <li>شغّل الخادم المحلي وافتح صفحة إعداد المسؤول لتفويض الحساب.</li>
+          </ol>
+        </details>
+        
+        <a class="primary-button" id="connect-drive" href="/auth/google" hidden style="width: 100%; margin-top: 10px;">المتابعة إلى Google</a>
+        <p class="admin-message" id="admin-message" role="alert"></p>
+      </section>
+    </main>
+    
+    <footer class="site-footer">
+      <span>© <span id="year"></span> Teacher Karkar</span>
+    </footer>
+
+    <script src="accounts.js"></script>
+    <script>
+      const statusBox = document.getElementById("setup-status");
+      const connectButton = document.getElementById("connect-drive");
+      const messageBox = document.getElementById("admin-message");
+      const params = new URLSearchParams(location.search);
+
+      async function loadSetup() {
+        try {
+          const response = await fetch("/api/setup/status", { credentials: "same-origin" });
+          const data = await response.json();
+          if (data.configured) {
+            statusBox.textContent = data.authorized
+              ? window.siteAccountText("driveSetupStatusReady")
+              : window.siteAccountText("driveSetupStatusAuthorized");
+            connectButton.hidden = false;
+          } else {
+            statusBox.dataset.state = "error";
+            statusBox.textContent = `${window.siteAccountText("driveSetupStatusIncompletePrefix")}${data.missing.join(", ")}`;
+          }
+        } catch {
+          statusBox.dataset.state = "error";
+          statusBox.textContent = window.siteAccountText("driveServerUnavailable");
+        }
+      }
+
+      if (params.has("error")) {
+        messageBox.textContent = params.get("error") === "oauth_denied"
+          ? window.siteAccountText("driveOAuthDenied")
+          : window.siteAccountText("driveOAuthFailed");
+      }
+      document.getElementById("year").textContent = new Date().getFullYear();
+      loadSetup();
+    </script>
+  </body>
+</html>
