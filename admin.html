@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fbf5ed" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0c1110" media="(prefers-color-scheme: dark)">
+    <meta name="robots" content="noindex,nofollow">
+    <title>إدارة ربط Google Drive | Teacher Karkar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="تصميم بدون عنوان.png">
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('mk-theme');
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      .admin-wrap { width: min(680px, calc(100% - 32px)); margin: 40px auto 80px; }
+      .admin-card { padding: 32px; border: 1px solid var(--line); border-radius: var(--radius-xl); background: var(--surface-solid); box-shadow: var(--shadow-lg); }
+      .admin-card h1 { margin: 8px 0 10px; font-size: 26px; font-weight: 600; color: var(--ink); }
+      .admin-card p, .admin-card li { color: var(--muted); font-size: 13px; line-height: 1.9; }
+      .admin-status { margin: 20px 0; padding: 14px 16px; border-radius: var(--radius); background: var(--surface-muted); color: var(--ink-soft); font-size: 13px; }
+      .admin-status[data-state="ready"] { background: var(--green-tint); color: var(--green-dark); border: 1px solid var(--green-light); }
+      .admin-status[data-state="error"] { background: var(--danger-bg); color: var(--danger-text); }
+      .admin-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+      .admin-help { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+      .admin-help code { direction: ltr; unicode-bidi: plaintext; background: var(--surface-muted); padding: 2px 6px; border-radius: 4px; }
+      .admin-message { display: none; margin-top: 12px; padding: 12px; border-radius: var(--radius); font-size: 12px; background: var(--danger-bg); color: var(--danger-text); }
+      .admin-message.visible { display: block; }
+    </style>
+  </head>
+  <body>
+    <div class="ambient-orbs" aria-hidden="true">
+      <span class="orb-one"></span>
+      <span class="orb-two"></span>
+      <span class="orb-three"></span>
+    </div>
+    
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark"><img src="تصميم بدون عنوان.png" alt="" aria-hidden="true"></span>
+        <span class="brand-copy"><strong>Teacher Karkar</strong></span>
+      </a>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="تبديل المظهر">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <a class="account-button" href="/requests">إدارة الطلبات</a>
+        <a class="account-button" href="/">← العودة للموقع</a>
+      </div>
+    </header>
+    
+    <main class="admin-wrap">
+      <section class="admin-card">
+        <span class="form-step-label">إعداد مسؤول الموقع</span>
+        <h1>ربط Google Drive</h1>
+        <p>هذه الصفحة مخصصة لصاحب الموقع فقط. بعد إعداد بيانات OAuth المحلية، سجّل الدخول بحساب Workspace الذي يملك صلاحية إضافة الملفات إلى مجلد الطلبات.</p>
+        
+        <div class="admin-status" id="drive-status" role="status">جارٍ التحقق من إعداد الربط...</div>
+        
+        <div class="admin-actions">
+          <a class="primary-button" id="connect-drive" href="/auth/google">تفويض حساب Google</a>
+          <button class="secondary-button" id="refresh-status" type="button">تحديث الحالة</button>
+        </div>
+        
+        <p class="admin-message" id="admin-message" role="alert"></p>
+        
+        <div class="admin-help">
+          <h2 style="font-size: 16px; margin-bottom: 12px;">مطلوب مرة واحدة قبل التفويض</h2>
+          <ol>
+            <li>تفعيل Google Drive API في مشروع Google Cloud.</li>
+            <li>إنشاء OAuth Client من نوع Web application وإضافة رابط الرجوع المطابق.</li>
+            <li>تحديد بريد المسؤول وإدخال بيانات OAuth محليًا في <code>.env</code>.</li>
+            <li>التأكد أن مجلد Drive خاص، وأن حساب المسؤول يستطيع إضافة الملفات إليه.</li>
+          </ol>
+          <p style="color: var(--danger); font-weight: 600; margin-top: 12px;">لا تُرسل Client Secret أو مفاتيح التشفير إلى المحادثة ولا تضعها في ملفات الواجهة.</p>
+        </div>
+      </section>
+    </main>
+    
+    <footer class="site-footer">
+      <span>© <span id="year"></span> Teacher Karkar</span>
+    </footer>
+
+    <script src="accounts.js"></script>
+    <script>
+      const statusBox = document.getElementById("drive-status");
+      const messageBox = document.getElementById("admin-message");
+      const connectButton = document.getElementById("connect-drive");
+
+      async function loadStatus() {
+        statusBox.dataset.state = "";
+        statusBox.textContent = window.siteAccountText("driveChecking");
+        messageBox.classList.remove("visible");
+        try {
+          const response = await fetch("/api/admin/drive-status", { credentials: "same-origin" });
+          const result = await response.json();
+          
+          if (response.status === 401) {
+            statusBox.textContent = window.siteAccountText("driveNeedsSignIn");
+            connectButton.hidden = true;
+            return;
+          }
+          if (!response.ok) throw new Error(result.error || "تعذر التحقق من إعداد Drive.");
+          
+          connectButton.hidden = !result.configured;
+          statusBox.dataset.state = result.connected ? "ready" : result.configured ? "" : "error";
+          statusBox.textContent = result.connected
+            ? `${window.siteAccountText("driveConnectedPrefix")}${result.adminEmail}${window.siteAccountText("driveConnectedSuffix")}`
+            : result.configured
+              ? window.siteAccountText("driveConfiguredNotConnected")
+              : `${window.siteAccountText("driveSetupIncompletePrefix")}${result.missing.join(", ")}`;
+        } catch (error) {
+          statusBox.dataset.state = "error";
+          statusBox.textContent = error.message;
+        }
+      }
+
+      const params = new URLSearchParams(location.search);
+      if (params.has("error")) {
+        messageBox.textContent = params.get("error") === "oauth_denied"
+          ? window.siteAccountText("driveOAuthDeniedAdmin")
+          : window.siteAccountText("driveOAuthFailedAdmin");
+        messageBox.classList.add("visible");
+      }
+      
+      document.getElementById("refresh-status").addEventListener("click", loadStatus);
+      document.getElementById("year").textContent = new Date().getFullYear();
+      loadStatus();
+    </script>
+  </body>
+</html>
