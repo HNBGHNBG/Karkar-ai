@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fbf5ed" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0c1110" media="(prefers-color-scheme: dark)">
+    <meta name="robots" content="noindex,nofollow">
+    <title>لوحة المالك | Teacher Karkar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="تصميم بدون عنوان.png">
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('mk-theme');
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      .owner-wrap { width: min(1080px, calc(100% - 32px)); margin: 36px auto 70px; }
+      .owner-card { margin: 18px 0; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius-xl); background: var(--surface-solid); box-shadow: var(--shadow-sm); }
+      .owner-card h2 { margin: 0 0 8px; font-size: 20px; font-weight: 600; }
+      .owner-card p { color: var(--muted); font-size: 12.5px; line-height: 1.8; margin-bottom: 16px; }
+      
+      .owner-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+      .owner-permissions { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 10px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-muted); margin-top: 10px; }
+      .owner-permissions label { display: flex; align-items: center; gap: 8px; color: var(--ink-soft); font-size: 12px; cursor: pointer; }
+      .owner-permissions input { accent-color: var(--green); width: 16px; height: 16px; }
+      
+      .owner-account-list, .conversation-list { display: grid; gap: 12px; margin-top: 16px; }
+      .owner-account, .conversation-row { padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-muted); display: flex; flex-direction: column; gap: 12px; }
+      .owner-account-top, .conversation-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+      .owner-account strong, .conversation-row strong { display: block; font-size: 14px; color: var(--ink); }
+      .owner-account small, .conversation-row small { color: var(--muted); font-size: 11.5px; }
+      
+      .owner-badge { display: inline-flex; margin-top: 6px; padding: 4px 10px; border-radius: var(--radius-full); color: var(--green-dark); background: var(--green-pale); font-size: 11px; font-weight: 600; }
+      .owner-badge.admin { background: #e9eff9; color: #5977a6; }
+      .owner-badge.owner { background: #fef3c7; color: #92400e; }
+      
+      .owner-account-controls { display: grid; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+      .owner-account-controls select { min-height: 40px; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 12px; background: var(--surface-solid); font: inherit; color: var(--ink); }
+      
+      .conversation-messages { display: grid; gap: 12px; max-height: 55vh; overflow-y: auto; margin: 16px 0; padding-right: 6px; }
+      .conversation-message { padding: 12px 16px; border-radius: var(--radius); background: var(--surface-muted); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.8; color: var(--ink); }
+      .conversation-message[data-sender="assistant"] { background: var(--green-pale); color: var(--green-dark); }
+      .conversation-message b { display: block; margin-bottom: 6px; font-size: 10.5px; opacity: .8; }
+      
+      .owner-status { margin: 16px 0; color: var(--green-dark); font-size: 13px; font-weight: 500; padding: 12px; border-radius: var(--radius); background: var(--green-tint); display: none; }
+      .owner-status.error { color: var(--danger-text); background: var(--danger-bg); }
+      
+      .owner-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+      @media (max-width: 650px) {
+        .owner-grid { grid-template-columns: 1fr; }
+        .owner-card { padding: 20px; }
+        .owner-account-top, .conversation-row { flex-direction: column; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark"><img src="تصميم بدون عنوان.png" alt="" aria-hidden="true"></span>
+        <span class="brand-copy"><strong>Teacher Karkar</strong></span>
+      </a>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="تبديل المظهر">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <a class="account-link" href="/requests">إدارة الطلبات</a>
+        <button class="account-button" id="account-open" type="button">الحساب</button>
+        <button class="account-button account-signout" id="account-signout" type="button">تسجيل الخروج</button>
+      </div>
+    </header>
+    
+    <main class="owner-wrap">
+      <span class="form-step-label">تحكم المالك</span>
+      <h1 style="margin: 8px 0 16px; font-size: 28px;">الحسابات والمحادثات</h1>
+      <p style="color:var(--muted); font-size:14px; margin-bottom:24px;">المالك الوحيد يحدد أدوار الحسابات وصلاحيات الإدارة، ويستطيع الاطلاع على المحادثات المحفوظة.</p>
+      
+      <div class="owner-status" id="owner-status" role="status"></div>
+
+      <section class="owner-card">
+        <h2>إنشاء حساب إدارة أو أقارب وأصدقاء</h2>
+        <p>حسابات الأقارب والأصدقاء مستثناة من الدفع مدى الحياة. لا توجد مدفوعات أو إعلانات مفعّلة الآن.</p>
+        
+        <form class="owner-grid" id="privileged-account-form">
+          <label class="field"><span>الاسم الكامل</span><input name="name" required maxlength="120"></label>
+          <label class="field"><span>البريد الإلكتروني</span><input name="email" type="email" required maxlength="254"></label>
+          <label class="field"><span>كلمة مرور مؤقتة (12 حرفًا على الأقل)</span><input name="password" type="password" required minlength="12" maxlength="256" autocomplete="new-password"></label>
+          <label class="field"><span>نوع الحساب</span>
+            <select name="role" id="privileged-role">
+              <option value="admin">إدارة</option>
+              <option value="circle">أقارب وأصدقاء</option>
+            </select>
+          </label>
+          
+          <fieldset class="owner-permissions" id="permission-editor" style="grid-column: 1 / -1;"></fieldset>
+          
+          <div style="grid-column: 1 / -1; margin-top: 8px;">
+            <button class="primary-button" type="submit">إنشاء الحساب</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="owner-card">
+        <div class="owner-section-heading">
+          <h2>إدارة الحسابات</h2>
+          <button class="secondary-button" id="refresh-accounts" type="button">تحديث</button>
+        </div>
+        <div id="owner-accounts" class="owner-account-list"></div>
+      </section>
+
+      <section class="owner-card">
+        <div class="owner-section-heading">
+          <h2>المحادثات المحفوظة</h2>
+          <button class="secondary-button" id="refresh-conversations" type="button">تحديث</button>
+        </div>
+        <p>محادثات المستخدم والذكاء الاصطناعي تُحفظ كسجل عادي. يراها المالك دائمًا، ولا يراها حساب الإدارة إلا إذا منحه المالك صلاحية الاطلاع على المحادثات.</p>
+        <div id="conversation-list" class="conversation-list"></div>
+      </section>
+    </main>
+
+    <dialog class="site-dialog" id="conversation-dialog" aria-labelledby="conversation-title">
+      <form method="dialog" class="dialog-close-row"><button class="dialog-close" aria-label="إغلاق">×</button></form>
+      <h2 id="conversation-title" style="margin-bottom: 4px;"></h2>
+      <p class="dialog-description" id="conversation-owner" style="margin-bottom: 16px;"></p>
+      <div class="conversation-messages" id="conversation-messages"></div>
+      <form method="dialog"><button class="secondary-button" style="width:100%;">إغلاق</button></form>
+    </dialog>
+
+    <footer class="site-footer">
+      <span>© <span id="year"></span> Teacher Karkar</span>
+    </footer>
+
+    <script src="accounts.js"></script>
+    <script src="owner.js"></script>
+  </body>
+</html>
