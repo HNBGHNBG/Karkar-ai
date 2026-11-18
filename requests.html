@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fbf5ed" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0c1110" media="(prefers-color-scheme: dark)">
+    <meta name="robots" content="noindex,nofollow">
+    <title>إدارة الطلبات | Teacher Karkar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="تصميم بدون عنوان.png">
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('mk-theme');
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      .requests-wrap { width: min(1080px, calc(100% - 32px)); margin: 36px auto 70px; }
+      .requests-card { padding: 24px; border: 1px solid var(--line); border-radius: var(--radius-xl); background: var(--surface-solid); box-shadow: var(--shadow-lg); }
+      .requests-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+      .requests-heading h1 { margin: 0; font-size: 25px; font-weight: 600; }
+      .requests-toolbar { display: grid; grid-template-columns: minmax(0,1fr) 220px auto; gap: 10px; margin-bottom: 20px; }
+      .requests-toolbar input, .requests-toolbar select { min-height: 44px; padding: 9px 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-solid); color: var(--ink); font: inherit; font-size: 13px; }
+      .requests-toolbar input:focus, .requests-toolbar select:focus { border-color: var(--green); outline: none; box-shadow: var(--shadow-glow); }
+      
+      .request-list { display: grid; gap: 10px; }
+      .request-row { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-muted); transition: all var(--dur); cursor: pointer; }
+      .request-row:hover { border-color: var(--green-light); background: var(--surface-solid); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+      .request-row h2 { margin: 0 0 6px; font-size: 15px; overflow-wrap: anywhere; color: var(--ink); }
+      .request-row p { margin: 4px 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+      .request-row-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; color: var(--muted-soft); font-size: 11px; margin-top: 8px; }
+      
+      .request-badge { display: inline-flex; margin-top: 10px; padding: 4px 10px; border-radius: var(--radius-full); font-size: 11px; font-weight: 600; }
+      .request-badge[data-status="received"] { background: var(--green-pale); color: var(--green-dark); }
+      .request-badge[data-status="in_progress"] { background: var(--warn-bg); color: var(--warn-text); }
+      .request-badge[data-status="completed"] { background: #dcfce7; color: #166534; }
+      .request-badge[data-status="cancelled"], .request-badge[data-status="partial_upload"] { background: var(--danger-bg); color: var(--danger-text); }
+      
+      .request-details { width: min(760px, calc(100% - 28px)); max-height: min(88vh, 900px); overflow: auto; }
+      .request-detail-groups { display: grid; gap: 12px; margin: 14px 0; }
+      .request-detail-group { padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-solid); }
+      .request-detail-group h3 { margin: 0 0 12px; color: var(--green-dark); font-size: 13px; }
+      .request-detail-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+      .request-detail-item { min-width: 0; }
+      .request-detail-item b, .request-detail-item span { display: block; overflow-wrap: anywhere; }
+      .request-detail-item b { margin-bottom: 4px; color: var(--muted); font-size: 11px; font-weight: 500; }
+      .request-detail-item span { font-size: 13px; line-height: 1.7; white-space: pre-wrap; color: var(--ink); }
+      
+      .request-attachment-list { display: grid; gap: 8px; margin: 8px 0 0; padding: 0; list-style: none; }
+      .request-attachment-list a { color: var(--green-dark); font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); background: var(--green-tint); transition: all var(--dur); }
+      .request-attachment-list a:hover { background: var(--green-pale); text-decoration: underline; }
+      
+      .request-update-row { display: flex; align-items: center; gap: 12px; margin: 16px 0; padding: 12px; background: var(--surface-muted); border-radius: var(--radius); }
+      .request-update-row label { font-size: 12px; font-weight: 600; color: var(--ink); }
+      .request-update-row select { padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); font: inherit; font-size: 13px; }
+      
+      .request-dashboard-status { min-height: 20px; margin: 12px 0; color: var(--muted); font-size: 13px; font-weight: 500; }
+      .request-dashboard-status[data-error="true"] { color: var(--danger); }
+      .request-empty { padding: 40px 20px; text-align: center; color: var(--muted); font-size: 14px; border: 1px dashed var(--line); border-radius: var(--radius-md); }
+      
+      @media (max-width: 650px) {
+        .requests-card { padding: 16px; }
+        .requests-toolbar { grid-template-columns: 1fr; }
+        .request-row { grid-template-columns: 1fr; align-items: start; }
+        .request-row > button { justify-self: start; margin-top: 10px; }
+        .request-detail-grid { grid-template-columns: 1fr; }
+        .request-update-row { flex-direction: column; align-items: stretch; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark"><img src="تصميم بدون عنوان.png" alt="" aria-hidden="true"></span>
+        <span class="brand-copy"><strong>Teacher Karkar</strong></span>
+      </a>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="تبديل المظهر">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <a class="account-link" id="owner-link" href="/owner" hidden>لوحة المالك</a>
+        <button class="account-button" id="account-open" type="button">الحساب</button>
+        <button class="account-button account-signout" id="account-signout" type="button">تسجيل الخروج</button>
+      </div>
+    </header>
+    
+    <main class="requests-wrap">
+      <section class="requests-card">
+        <span class="form-step-label">إدارة الطلبات</span>
+        <div class="requests-heading">
+          <h1>طلبات العملاء</h1>
+          <button class="secondary-button" id="refresh-requests" type="button">تحديث</button>
+        </div>
+        <p class="owner-muted" style="color:var(--muted); font-size:13px; margin-bottom:20px;">استعرض الطلبات المحفوظة في Google Drive، وافتح التفاصيل أو المرفقات. تظهر الطلبات الأحدث أولًا.</p>
+        
+        <p class="request-dashboard-status" id="requests-status" role="status" aria-live="polite">جارٍ تحميل الطلبات...</p>
+        
+        <div class="requests-toolbar">
+          <input id="request-search" type="search" placeholder="ابحث بالاسم أو رقم الطلب أو الموضوع">
+          <select id="request-filter-status" aria-label="تصفية حسب الحالة">
+            <option value="">كل الحالات</option>
+            <option value="received">مستلم</option>
+            <option value="partial_upload">رفع غير مكتمل</option>
+            <option value="in_progress">قيد الإعداد</option>
+            <option value="completed">مكتمل</option>
+            <option value="cancelled">ملغي</option>
+          </select>
+        </div>
+        
+        <div class="request-list" id="request-list"></div>
+      </section>
+    </main>
+
+    <dialog class="site-dialog request-details" id="request-dialog" aria-labelledby="request-dialog-title">
+      <form method="dialog" class="dialog-close-row"><button class="dialog-close" aria-label="إغلاق">×</button></form>
+      <span class="form-step-label">تفاصيل الطلب</span>
+      <h2 id="request-dialog-title" style="font-family:var(--font-mono); direction:ltr; text-align:left;"></h2>
+      
+      <div class="request-update-row" id="request-update-row" hidden>
+        <label for="request-status-select">حالة الطلب:</label>
+        <select class="request-status-select" id="request-status-select">
+          <option value="received">مستلم</option>
+          <option value="partial_upload">رفع غير مكتمل</option>
+          <option value="in_progress">قيد الإعداد</option>
+          <option value="completed">مكتمل</option>
+          <option value="cancelled">ملغي</option>
+        </select>
+        <button class="primary-button" id="save-request-status" type="button" style="min-height:36px;">حفظ الحالة</button>
+      </div>
+      
+      <div class="request-detail-groups" id="request-detail-groups"></div>
+      <form method="dialog"><button class="secondary-button" style="width:100%;">إغلاق</button></form>
+    </dialog>
+
+    <footer class="site-footer">
+      <span>© <span id="year"></span> Teacher Karkar</span>
+    </footer>
+
+    <script src="accounts.js"></script>
+    <script src="requests.js"></script>
+  </body>
+</html>
