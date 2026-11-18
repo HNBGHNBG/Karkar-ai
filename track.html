@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fbf5ed" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0c1110" media="(prefers-color-scheme: dark)">
+    <title>تتبع الطلب | Teacher Karkar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="تصميم بدون عنوان.png">
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('mk-theme');
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      .track-wrap {
+        width: min(680px, calc(100% - 32px));
+        margin: 40px auto 80px;
+      }
+      .track-card {
+        padding: 32px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-xl);
+        background: var(--surface-solid);
+        box-shadow: var(--shadow-xl);
+      }
+      .track-card h1 {
+        margin: 8px 0;
+        font-size: 26px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .track-card > p {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.9;
+        margin-bottom: 24px;
+      }
+      .track-form {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      .track-form input {
+        flex: 1;
+        height: 46px;
+        padding: 0 16px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        font: inherit;
+        font-size: 14px;
+        direction: ltr;
+        text-align: left;
+        background: var(--surface-solid);
+        color: var(--ink);
+        transition: all var(--dur);
+      }
+      .track-form input:focus {
+        outline: none;
+        border-color: var(--green);
+        box-shadow: var(--shadow-glow);
+      }
+      .track-form button {
+        min-height: 46px;
+        padding: 0 24px;
+      }
+      
+      /* Result Section */
+      .track-result {
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid var(--line);
+        display: none;
+      }
+      .track-result.visible {
+        display: block;
+        animation: page-in var(--dur-slow) var(--ease-out);
+      }
+      .tr-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .tr-id {
+        font: 700 18px var(--font-mono);
+        direction: ltr;
+        color: var(--ink);
+        letter-spacing: 0.5px;
+      }
+      .tr-topic {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 6px;
+      }
+      .tr-badge {
+        padding: 6px 14px;
+        border-radius: var(--radius-full);
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--surface-muted);
+        color: var(--ink-soft);
+        white-space: nowrap;
+      }
+      
+      /* Status colors */
+      .tr-badge[data-status="received"] { background: var(--green-pale); color: var(--green-dark); }
+      .tr-badge[data-status="in_progress"] { background: var(--warn-bg); color: var(--warn-text); }
+      .tr-badge[data-status="completed"] { background: #dcfce7; color: #166534; }
+      .tr-badge[data-status="cancelled"], .tr-badge[data-status="partial_upload"] { background: var(--danger-bg); color: var(--danger-text); }
+
+      .tr-facts {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .tr-fact {
+        padding: 12px 14px;
+        background: var(--surface-muted);
+        border-radius: var(--radius-sm);
+      }
+      .tr-fact small {
+        display: block;
+        color: var(--muted-soft);
+        font-size: 10.5px;
+        margin-bottom: 4px;
+      }
+      .tr-fact span {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink);
+      }
+      
+      .tr-error {
+        margin-top: 18px;
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        background: var(--danger-bg);
+        color: var(--danger-text);
+        font-size: 12.5px;
+        display: none;
+      }
+      .tr-error.visible {
+        display: block;
+        animation: page-in var(--dur) var(--ease-out);
+      }
+      .tr-help {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line-soft);
+        color: var(--muted-soft);
+        font-size: 11px;
+        line-height: 1.8;
+      }
+      @media (max-width: 600px) {
+        .track-form { flex-direction: column; }
+        .tr-facts { grid-template-columns: 1fr; }
+        .track-card { padding: 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ambient-orbs" aria-hidden="true">
+      <span class="orb-one"></span>
+      <span class="orb-two"></span>
+      <span class="orb-three"></span>
+    </div>
+    
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark"><img src="تصميم بدون عنوان.png" alt="" aria-hidden="true"></span>
+        <span class="brand-copy">
+          <strong>Teacher Karkar</strong>
+        </span>
+      </a>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="تبديل المظهر">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <a class="account-button" href="/">← العودة للموقع</a>
+      </div>
+    </header>
+
+    <main class="track-wrap">
+      <section class="track-card">
+        <span class="form-step-label">متابعة الطلب</span>
+        <h1>تتبع حالة طلبك</h1>
+        <p>أدخل رقم الطلب الذي وصلك بعد الإرسال (يبدأ بـ MK-) لمعرفة حالته الحالية. لا يحتاج تسجيل دخول.</p>
+
+        <div class="track-form">
+          <input id="track-id" type="text" placeholder="MK-20241118-A1B2C3D4E5" autocomplete="off" maxlength="30" dir="ltr">
+          <button class="primary-button" id="track-btn" type="button">بحث</button>
+        </div>
+
+        <div class="tr-error" id="tr-error" role="alert"></div>
+
+        <div class="track-result" id="track-result">
+          <div class="tr-head">
+            <div>
+              <div class="tr-id" id="tr-id"></div>
+              <div class="tr-topic" id="tr-topic"></div>
+            </div>
+            <span class="tr-badge" id="tr-badge"></span>
+          </div>
+          <div class="tr-facts">
+            <div class="tr-fact">
+              <small>تاريخ الاستلام</small>
+              <span id="tr-received"></span>
+            </div>
+            <div class="tr-fact">
+              <small>آخر تحديث</small>
+              <span id="tr-updated"></span>
+            </div>
+            <div class="tr-fact">
+              <small>المرحلة الدراسية</small>
+              <span id="tr-stage"></span>
+            </div>
+            <div class="tr-fact">
+              <small>نوع الطلب</small>
+              <span id="tr-type"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tr-help">
+          فقدت رقم الطلب؟ تحقق من بريدك الإلكتروني — يُرسل الرقم عند تقديم الطلب.
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>© <span id="year"></span> Teacher Karkar</span>
+      <span>هذا الموقع يتبع سلسلة برامج مستر كركر</span>
+    </footer>
+
+    <script src="accounts.js"></script>
+    <script>
+      const LABELS = {
+        received: "مستلم",
+        partial_upload: "رفع غير مكتمل",
+        in_progress: "قيد الإعداد",
+        completed: "مكتمل",
+        cancelled: "ملغي"
+      };
+      const STAGES = { primary: "ابتدائي", middle: "متوسط", secondary: "ثانوي", university: "جامعي" };
+      const TYPES = {
+        teacher_lesson: "درس للمعلم", lesson: "درس دراسي", oral: "عرض شفهي",
+        project: "مشروع أو بحث", professional: "طلب مهني"
+      };
+
+      const $ = (id) => document.getElementById(id);
+      const err = $("tr-error");
+      const result = $("track-result");
+      const btn = $("track-btn");
+      const input = $("track-id");
+
+      function showErr(msg) {
+        err.textContent = msg;
+        err.classList.add("visible");
+        result.classList.remove("visible");
+      }
+
+      function fmt(d) {
+        if (!d) return "—";
+        try {
+          return new Date(d).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" });
+        } catch { return String(d); }
+      }
+
+      async function track() {
+        err.classList.remove("visible");
+        result.classList.remove("visible");
+        
+        const id = input.value.trim().toUpperCase();
+        if (!id) return showErr("أدخل رقم الطلب أولًا.");
+        if (!/^MK-\d{8}-[A-F0-9]{10}$/.test(id)) return showErr("رقم الطلب غير صالح. الصيغة: MK-YYYYMMDD-XXXXXXXXXX");
+
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = "جارٍ البحث…";
+
+        try {
+          const r = await fetch("/api/requests/track/" + encodeURIComponent(id), { credentials: "same-origin" });
+          
+          if (r.status === 404) return showErr("لم نجد طلبًا بهذا الرقم.");
+          if (r.status === 429) return showErr("محاولات كثيرة جداً. انتظر دقيقة وأعد المحاولة.");
+          if (!r.ok) return showErr("تعذر البحث الآن. قد يكون الخادم قيد الصيانة.");
+          
+          const d = await r.json();
+
+          $("tr-id").textContent = d.requestId || id;
+          $("tr-topic").textContent = d.topic || "لم يتم تحديد موضوع";
+          
+          const badge = $("tr-badge");
+          badge.textContent = LABELS[d.status] || d.status;
+          badge.dataset.status = d.status || "received";
+
+          $("tr-received").textContent = fmt(d.receivedAt);
+          $("tr-updated").textContent = fmt(d.updatedAt);
+          $("tr-stage").textContent = STAGES[d.stage] || "—";
+          $("tr-type").textContent = TYPES[d.requestType] || "—";
+          
+          result.classList.add("visible");
+        } catch {
+          showErr("تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت.");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      }
+
+      btn.addEventListener("click", track);
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") track(); });
+
+      // Auto-fill from URL hash (e.g., /track.html#MK-20241118-A1B2C3D4E5)
+      const hash = location.hash.replace("#", "").toUpperCase();
+      if (hash.startsWith("MK-")) {
+        input.value = hash;
+        track();
+      }
+
+      $("year").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
