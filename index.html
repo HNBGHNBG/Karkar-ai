@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fbf5ed" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0c1110" media="(prefers-color-scheme: dark)">
+    <meta name="description" content="Teacher Karkar - Educational materials request site">
+    <title>Teacher Karkar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="تصميم بدون عنوان.png">
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('mk-theme');
+          if (stored === 'light' || stored === 'dark') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="ambient-orbs" aria-hidden="true">
+      <span class="orb-one"></span>
+      <span class="orb-two"></span>
+      <span class="orb-three"></span>
+    </div>
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="Teacher Karkar home">
+        <span class="brand-mark"><img src="تصميم بدون عنوان.png" alt="" aria-hidden="true"></span>
+        <span class="brand-copy">
+          <strong>Teacher Karkar</strong>
+        </span>
+      </a>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="تبديل المظهر">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <button class="account-button" id="account-open" type="button" data-i18n="signInCreate">تسجيل الدخول / إنشاء حساب</button>
+        <a class="account-link" id="owner-link" href="/owner" data-i18n="ownerDashboard" hidden>لوحة المالك</a>
+        <a class="account-link" id="requests-link" href="/requests" data-i18n="requestDashboard" hidden>إدارة الطلبات</a>
+        <button class="account-button account-signout" id="account-signout" type="button" data-i18n="signOut" hidden>تسجيل الخروج</button>
+        <select class="language-select" id="interface-language" aria-label="لغة واجهة الموقع">
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+          <option value="other">لغات أخرى</option>
+        </select>
+        <select class="language-select" id="other-interface-language" aria-label="لغات أخرى" hidden></select>
+        <span id="language-status" class="visually-hidden" role="status" aria-live="polite"></span>
+      </div>
+    </header>
+
+    <dialog class="site-dialog account-dialog" id="account-dialog" aria-labelledby="account-title">
+      <form method="dialog" class="dialog-close-row"><button class="dialog-close" aria-label="إغلاق">×</button></form>
+      <span class="form-step-label" data-i18n="accountKicker">حساب مستر كركر</span>
+      <h2 id="account-title" data-i18n="accountTitle">مرحبًا بك</h2>
+      <p class="dialog-description" id="account-description" data-i18n="accountDescription">سجّل الدخول أو أنشئ حساب مستخدم لتقديم طلبك.</p>
+      <div class="account-tabs" id="account-tabs">
+        <button type="button" class="account-tab active" data-auth-mode="login" data-i18n="signIn">تسجيل الدخول</button>
+        <button type="button" class="account-tab" data-auth-mode="register" data-i18n="createAccount">إنشاء حساب</button>
+      </div>
+      <form id="login-form" class="account-form">
+        <label class="field"><span data-i18n="email">البريد الإلكتروني</span><input name="email" type="email" autocomplete="email" required maxlength="254"></label>
+        <label class="field"><span data-i18n="password">كلمة المرور</span><input name="password" type="password" autocomplete="current-password" required maxlength="256"></label>
+        <button class="primary-button" type="submit" data-i18n="signIn">تسجيل الدخول</button>
+      </form>
+      <form id="register-form" class="account-form" hidden>
+        <label class="field"><span data-i18n="fullNamePlain">الاسم الكامل</span><input name="name" type="text" autocomplete="name" required maxlength="120"></label>
+        <label class="field"><span data-i18n="emailPlain">البريد الإلكتروني</span><input name="email" type="email" autocomplete="email" required maxlength="254"></label>
+        <label class="field">
+          <span data-i18n="accountCountry">بلد الإقامة أو الدراسة</span>
+          <input name="country" type="text" autocomplete="country-name" required maxlength="100"
+            placeholder="مثال: سلطنة عُمان" data-placeholder-ar="مثال: سلطنة عُمان" data-placeholder-en="e.g. Oman">
+          <small class="field-hint" data-i18n="accountCountryHint">اكتب اسم الدولة التي تقيم أو تدرس فيها.</small>
+        </label>
+        <label class="field"><span data-i18n="password">كلمة المرور (12 حرفًا على الأقل)</span><input name="password" type="password" autocomplete="new-password" required minlength="12" maxlength="256"></label>
+        <label class="dialog-check"><input name="ageConfirmed" type="checkbox" required><span data-i18n="ageConfirm">أؤكد أن عمري 10 سنوات أو أكثر</span></label>
+        <label class="dialog-check"><input name="privacyAccepted" type="checkbox" required><span data-i18n="accountPrivacyAccept">أوافق على سياسة الخصوصية</span><button class="text-link" type="button" data-open-privacy data-i18n="readPolicy">قراءة السياسة</button></label>
+        <button class="primary-button" type="submit" data-i18n="createAccount">إنشاء حساب</button>
+      </form>
+      <form id="owner-setup-form" class="account-form" hidden>
+        <label class="field"><span data-i18n="ownerSetupCode">رمز إعداد المالك</span><input name="setupToken" type="password" required autocomplete="off"></label>
+        <label class="field"><span data-i18n="fullNamePlain">الاسم الكامل</span><input name="name" type="text" required maxlength="120"></label>
+        <label class="field"><span data-i18n="emailPlain">البريد الإلكتروني</span><input name="email" type="email" required maxlength="254"></label>
+        <label class="field"><span data-i18n="password">كلمة المرور (12 حرفًا على الأقل)</span><input name="password" type="password" required minlength="12" maxlength="256" autocomplete="new-password"></label>
+        <label class="dialog-check"><input name="ageConfirmed" type="checkbox" required><span data-i18n="ageConfirm">أؤكد أن عمري 10 سنوات أو أكثر</span></label>
+        <label class="dialog-check"><input name="privacyAccepted" type="checkbox" required><span data-i18n="accountPrivacyAccept">أوافق على سياسة الخصوصية</span></label>
+        <button class="primary-button" type="submit" data-i18n="createOwner">إنشاء حساب المالك الوحيد</button>
+      </form>
+      <p class="account-message" id="account-message" role="alert" hidden></p>
+    </dialog>
+
+    <dialog class="site-dialog" id="privacy-dialog" aria-labelledby="privacy-title">
+      <form method="dialog" class="dialog-close-row"><button class="dialog-close" aria-label="إغلاق">×</button></form>
+      <span class="form-step-label" data-i18n="privacyKicker">معلومات مهمة</span>
+      <h2 id="privacy-title" data-i18n="privacyTitle">سياسة الخصوصية واستخدام الموقع</h2>
+      <div class="privacy-content">
+        <h3 data-i18n="privacyAccountHeading">الحسابات</h3>
+        <p data-i18n="privacyAccountText">يُستخدم بريدك لإنشاء حسابك وتسجيل الدخول وربط طلباتك بك. لا تكتب كلمة مرورك في الطلب أو المرفقات.</p>
+        <h3 data-i18n="privacyRequestHeading">الطلبات والمرفقات</h3>
+        <p data-i18n="privacyRequestText">نسألك في الطلب إن كنت تقيم أو تدرس في عُمان. وعند إنشاء حساب جديد نطلب اسم دولة الإقامة أو الدراسة. لا نطلب موقع جهازك الدقيق. تُستخدم هذه المعلومات والمرفقات لمراجعة الطلب وإعداد المخرجات التي اخترتها، ويمكن للمالك والموظفين الذين منحهم صلاحية الاطلاع رؤيتها.</p>
+        <h3 data-i18n="privacyStorageHeading">التخزين</h3>
+        <p data-i18n="privacyStorageText">عند تفعيل الربط، تُحفظ الطلبات والمرفقات في مجلد Google Drive خاص.</p>
+        <h3 data-i18n="privacyAgeHeading">العمر والموافقة</h3>
+        <p data-i18n="privacyAgeText">يجب أن يكون عمر صاحب الحساب 10 سنوات أو أكثر، وأن يوافق على معالجة البيانات قبل إنشاء الحساب أو إرسال الطلب.</p>
+        <h3 data-i18n="privacyContactHeading">الاستفسارات</h3>
+        <p data-i18n="privacyContactText">للاستفسار عن حسابك أو بيانات طلبك، تواصل مع إدارة الموقع من خلال بيانات التواصل المنشورة فيه.</p>
+      </div>
+      <form method="dialog"><button class="primary-button" data-i18n="closePolicy">إغلاق</button></form>
+    </dialog>
+
+    <main>
+      <section id="welcome-screen">
+        <div class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">
+              <span class="eyebrow-dot"></span>
+              <span data-i18n="eyebrow">التعلم أحلى مع مستر كركر</span>
+            </div>
+            <h1 data-i18n="heroTitle">اجعل فكرتك<br><em>تزأر مع تيتشر كركر.</em></h1>
+            <p class="hero-description" data-i18n="heroDescription">حوّل الدرس أو الفكرة إلى مخرج تعليمي يناسبك؛ اختر نوعًا واحدًا أو اجمع أكثر من نوع في طلبك.</p>
+            <div class="hero-points">
+              <span><span class="check-icon">✓</span><span data-i18n="pointOne">خطوات بسيطة وواضحة</span></span>
+              <span><span class="check-icon">✓</span><span data-i18n="pointTwo">مجانًا للخدمات التعليمية</span></span>
+            </div>
+            <div class="hero-note">
+              <span class="note-icon">✦</span>
+              <p data-i18n="heroNote">بعد اكتمال ربط Google Drive، سيُحفظ طلبك ومرفقاتك في مجلد خاص.</p>
+            </div>
+          </div>
+          <aside class="start-card">
+            <div class="card-topline">
+              <span class="card-kicker" data-i18n="startKicker">خطوتك الأولى</span>
+              <span class="step-count"><span>01</span> / 03</span>
+            </div>
+            <h2 data-i18n="whoAreYou">من معنا اليوم؟</h2>
+            <p class="card-description" data-i18n="whoDescription">اختر مسارك، ومستر كركر يضبط الأسئلة على طلبك.</p>
+            <div class="role-options">
+              <button class="role-option" type="button" data-role="teacher">
+                <span class="role-icon teacher-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4 3 8l9 4 9-4-9-4Z"/><path d="M3 8v6M21 8v6"/><path d="M7 11v4a5 5 0 0 0 10 0v-4"/></svg></span>
+                <span class="role-text"><strong data-i18n="teacher">أنا معلّم</strong><small data-i18n="teacherHint">درس مرتب، خطوة بخطوة مع مستر كركر</small></span>
+                <span class="arrow-icon">←</span>
+              </button>
+              <button class="role-option" type="button" data-role="student" data-student-type="school">
+                <span class="role-icon school-student-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+                <span class="role-text"><strong data-i18n="schoolStudent">أنا طالب مدرسي</strong><small data-i18n="schoolStudentHint">للمراحل الدراسية المدرسية</small></span>
+                <span class="arrow-icon">←</span>
+              </button>
+              <button class="role-option" type="button" data-role="student" data-student-type="university">
+                <span class="role-icon university-student-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M6 10v6c0 2 3 4 6 4s6-2 6-4v-6"/></svg></span>
+                <span class="role-text"><strong data-i18n="universityStudent">أنا طالب جامعي</strong><small data-i18n="universityStudentHint">للدراسة الجامعية</small></span>
+                <span class="arrow-icon">←</span>
+              </button>
+              <button class="role-option" type="button" data-role="other">
+                <span class="role-icon other-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
+                <span class="role-text"><strong data-i18n="otherRole">آخر</strong><small data-i18n="otherRoleHint">اختر مهنتك أو مجالك</small></span>
+                <span class="arrow-icon">←</span>
+              </button>
+            </div>
+            <div class="age-confirm">
+              <label class="check-label">
+                <input type="checkbox" id="age-confirm">
+                <span class="custom-check"></span>
+                <span data-i18n="ageConfirm">أؤكد أن عمري 10 سنوات أو أكثر</span>
+              </label>
+              <p class="inline-error" id="age-error" hidden></p>
+            </div>
+            <div class="card-footer">
+              <div class="secure-note">
+                <span>🔒</span>
+                <span data-i18n="privacyNote">تُرسل بياناتك بعد موافقتك وإرسال الطلب</span>
+              </div>
+            </div>
+          </aside>
+          <div class="hero-decoration decoration-one"></div>
+          <div class="hero-decoration decoration-two"></div>
+        </div>
+      </section>
+
+      <section id="request-screen" hidden>
+        <div class="request-shell">
+          <div class="progress-header">
+            <button class="back-button" id="back-to-welcome" type="button">
+              <span>←</span><span data-i18n="back">رجوع</span>
+            </button>
+            <div class="progress-track">
+              <span class="progress-step active"><i>1</i><span data-i18n="stepBasics">الأساسيات</span></span>
+              <span class="progress-line"></span>
+              <span class="progress-step"><i>2</i><span data-i18n="stepDetails">التفاصيل</span></span>
+              <span class="progress-line"></span>
+              <span class="progress-step"><i>3</i><span data-i18n="stepReview">المراجعة</span></span>
+            </div>
+            <span class="request-type-badge" id="role-badge">—</span>
+          </div>
+
+          <form id="request-form" class="conversation-layout" novalidate>
+            <aside class="conversation-aside">
+              <div class="aside-art">
+                <span class="art-sun"></span>
+                <span class="art-book"></span>
+                <span class="art-spark spark-a">✦</span>
+                <span class="art-spark spark-b">✧</span>
+              </div>
+              <span class="aside-label" data-i18n="yourJourney">رحلتك مع مستر كركر</span>
+              <h1 data-i18n="formTitle">يلا نجهّز فكرتك<br>مع مستر كركر.</h1>
+              <p data-i18n="formDescription">مستر كركر معك خطوة بخطوة؛ أجب براحتك، وتقدر ترجع وتعدّل قبل الإرسال.</p>
+              <div class="aside-tip">
+                <span>💡</span>
+                <span data-i18n="honestNote">مستر كركر يقول: العدد تقديري؛ وقد نضيف شرائح عند الحاجة ليبقى الموضوع شاملًا.</span>
+              </div>
+            </aside>
+
+            <div class="form-panel">
+              <div class="form-page active" data-page="1">
+                <div class="form-heading">
+                  <span class="form-step-label" data-i18n="firstStepLabel">الخطوة ١ من ٣</span>
+                  <h2 data-i18n="basicsHeading">لنتعرّف عليك وعلى فكرتك</h2>
+                  <p data-i18n="basicsSubheading">مستر كركر يحتاج هذه الأساسيات ليختار لك أسئلة المتابعة المناسبة.</p>
+                </div>
+                <div class="field-grid">
+                  <label class="field"><span data-i18n="fullName">الاسم الكامل</span><input name="name" type="text" autocomplete="name" maxlength="120"><span class="field-error" data-error-for="name"></span></label>
+                  <label class="field"><span data-i18n="email">البريد الإلكتروني</span><input name="email" type="email" autocomplete="email" maxlength="254"><span class="field-error" data-error-for="email"></span></label>
+                  <label class="field"><span data-i18n="phone">رقم الهاتف (اختياري)</span><input name="phone" type="tel" autocomplete="tel" maxlength="30"></label>
+                  <label class="field full-width"><span data-i18n="countryScope">هل تقيم أو تدرس في سلطنة عُمان؟</span>
+                    <select name="countryScope" required>
+                      <option value="" data-i18n="chooseOption">اختر خيارًا</option>
+                      <option value="oman" data-i18n="inOman">نعم، داخل سلطنة عُمان</option>
+                      <option value="outside_oman" data-i18n="outsideOman">لا، خارج سلطنة عُمان</option>
+                    </select>
+                    <span class="field-error" data-error-for="countryScope"></span>
+                  </label>
+                  <label class="field"><span data-i18n="schoolStatus">المدرسة أو الجامعة أو الجهة</span>
+                    <select name="schoolStatus" required>
+                      <option value="" data-i18n="chooseOption">اختر خيارًا</option>
+                      <option value="school" data-i18n="schoolOption">أنتمي إلى مدرسة أو جامعة</option>
+                      <option value="independent" data-i18n="independentOption">مستقل، لا أنتمي إلى مدرسة أو جامعة</option>
+                      <option value="other" data-i18n="otherOption">جهة أخرى</option>
+                    </select>
+                    <span class="field-error" data-error-for="schoolStatus"></span>
+                  </label>
+                  <label class="field" id="school-name-field" hidden><span id="school-name-label">اسم المدرسة</span><input name="schoolName" type="text" maxlength="200"><span class="field-error" data-error-for="schoolName"></span></label>
+                  <label class="field"><span data-i18n="educationStage">المرحلة الدراسية</span>
+                    <select name="stage" required>
+                      <option value="" data-i18n="chooseOption">اختر خيارًا</option>
+                      <option value="primary" data-i18n="primary">ابتدائي</option>
+                      <option value="middle" data-i18n="middle">متوسط</option>
+                      <option value="secondary" data-i18n="secondary">ثانوي</option>
+                      <option value="university" data-i18n="university">جامعي</option>
+                    </select>
+                    <span class="field-error" data-error-for="stage"></span>
+                  </label>
+                  <label class="field" id="profession-field" hidden><span data-i18n="profession">المهنة أو المجال</span>
+                    <select name="profession">
+                      <option value="" data-i18n="chooseOption">اختر خيارًا</option>
+                      <option value="healthcare" data-i18n="professionHealthcare">الصحة والطب</option>
+                      <option value="education" data-i18n="professionEducation">التعليم والتدريب</option>
+                      <option value="engineering" data-i18n="professionEngineering">الهندسة والعمارة والبناء</option>
+                      <option value="technology" data-i18n="professionTechnology">تقنية المعلومات والاتصالات</option>
+                      <option value="science" data-i18n="professionScience">العلوم والبحث والمختبرات</option>
+                      <option value="business" data-i18n="professionBusiness">الأعمال والإدارة وريادة الأعمال</option>
+                      <option value="finance" data-i18n="professionFinance">المحاسبة والمالية والمصارف</option>
+                      <option value="law" data-i18n="professionLaw">القانون والشؤون القانونية</option>
+                      <option value="public_service" data-i18n="professionPublicService">القطاع الحكومي والخدمة العامة</option>
+                      <option value="media" data-i18n="professionMedia">الإعلام والصحافة والاتصال</option>
+                      <option value="arts_design" data-i18n="professionArtsDesign">الفنون والتصميم وصناعة المحتوى</option>
+                      <option value="marketing_sales" data-i18n="professionMarketingSales">التسويق والمبيعات</option>
+                      <option value="trades" data-i18n="professionTrades">الحرف والصيانة والخدمات الفنية</option>
+                      <option value="agriculture" data-i18n="professionAgriculture">الزراعة والغذاء والثروة الحيوانية</option>
+                      <option value="environment" data-i18n="professionEnvironment">البيئة والاستدامة</option>
+                      <option value="hospitality" data-i18n="professionHospitality">السياحة والضيافة والفعاليات</option>
+                      <option value="transport" data-i18n="professionTransport">النقل واللوجستيات</option>
+                      <option value="safety" data-i18n="professionSafety">الأمن والسلامة والطوارئ</option>
+                      <option value="social_services" data-i18n="professionSocialServices">الخدمات الاجتماعية والمجتمعية</option>
+                      <option value="sports" data-i18n="professionSports">الرياضة واللياقة</option>
+                      <option value="personal_care" data-i18n="professionPersonalCare">العناية الشخصية والجمال</option>
+                      <option value="manufacturing" data-i18n="professionManufacturing">الصناعة والتصنيع</option>
+                      <option value="retail" data-i18n="professionRetail">التجزئة وخدمة العملاء</option>
+                      <option value="other" data-i18n="professionOther">مهنة أو مجال آخر</option>
+                    </select>
+                    <span class="field-error" data-error-for="profession"></span>
+                  </label>
+                  <label class="field" id="profession-other-field" hidden><span data-i18n="professionOtherLabel">اكتب مهنتك</span><input name="professionOther" type="text" maxlength="120"><span class="field-error" data-error-for="professionOther"></span></label>
+                  <label class="field" id="request-type-field" hidden><span data-i18n="requestType">نوع الطلب</span>
+                    <select name="requestType">
+                      <option value="" data-i18n="chooseOption">اختر خيارًا</option>
+                      <option value="lesson" data-i18n="lesson">درس دراسي</option>
+                      <option value="oral" data-i18n="oral">موضوع عام لعرض شفهي</option>
+                      <option value="project" data-i18n="project">مشروع أو بحث</option>
+                    </select>
+                    <span class="field-error" data-error-for="requestType"></span>
+                  </label>
+                  <label class="field full-width"><span id="topic-label" data-i18n="mainTopic">المادة وموضوع الدرس</span><input name="topic" type="text" maxlength="1200"><span class="field-error" data-error-for="topic"></span></label>
+                  <fieldset class="field full-width deliverables-fieldset" data-deliverable-group>
+                    <legend data-i18n="deliverablesHeading">ما الذي تريد إعداده؟</legend>
+                    <p data-i18n="deliverablesHint">اختر نوعًا واحدًا أو أكثر؛ يمكنك طلب كل مخرج وحده أو جمعه مع عرض تقديمي في الطلب نفسه.</p>
+                    <div class="deliverable-options">
+                      <label class="deliverable-option"><input type="checkbox" name="deliverables" value="presentation"><span data-i18n="deliverablePresentation">عرض تقديمي</span></label>
+                      <label class="deliverable-option"><input type="checkbox" name="deliverables" value="slide_deck"><span data-i18n="deliverableSlideDeck">مجموعة شرائح</span></label>
+                      <label class="deliverable-option"><input type="checkbox" name="deliverables" value="audio_summary"><span data-i18n="deliverableAudioSummary">ملخص صوتي</span></label>
+                      <label class="deliverable-option"><input type="checkbox" name="deliverables" value="video_summary"><span data-i18n="deliverableVideoSummary">ملخص بالفيديو</span></label>
+                      <label class="deliverable-option"><input type="checkbox" name="deliverables" value="mind_map"><span data-i18n="deliverableMindMap">خريطة ذهنية</span></label>
+                      <label class="deliverable-option"><input type="checkbox" name="deliverables" value="report"><span data-i18n="deliverableReport">تقارير</span></label>
+                      <label class="deliverable-option"><input type="checkbox" name="deliverables" value="flashcards"><span data-i18n="deliverableFlashcards">بطاقات تعليمية</span></label>
+                      <label class="deliverable-option"><input type="checkbox" name="deliverables" value="quiz"><span data-i18n="deliverableQuiz">اختبار</span></label>
+                      <label class="deliverable-option"><input type="checkbox" name="deliverables" value="chart"><span data-i18n="deliverableChart">مخطط بياني</span></label>
+                      <label class="deliverable-option"><input type="checkbox" name="deliverables" value="spreadsheet"><span data-i18n="deliverableSpreadsheet">جدول بيانات</span></label>
+                    </div>
+                    <span class="field-error" id="deliverables-error"></span>
+                  </fieldset>
+                  <label class="field full-width"><span data-i18n="objective">ما الهدف من المخرجات المطلوبة؟</span><textarea name="objective" rows="2" maxlength="2000"></textarea></label>
+                </div>
+                <div class="form-actions">
+                  <span class="required-note"><span data-i18n="requiredFields">حقول مطلوبة</span></span>
+                  <button class="primary-button" type="button" id="to-details"><span data-i18n="continue">متابعة</span> ←</button>
+                </div>
+              </div>
+
+              <div class="form-page" data-page="2">
+                <div class="form-heading">
+                  <span class="form-step-label" data-i18n="secondStepLabel">الخطوة ٢ من ٣</span>
+                  <h2 data-i18n="detailsHeading">مستر كركر جاهز يسمع التفاصيل</h2>
+                  <p data-i18n="detailsSubheading">اختر طريقة المتابعة، ثم أضف ما يساعد على إعداد المخرجات التي طلبتها.</p>
+                </div>
+                <fieldset class="method-picker">
+                  <legend data-i18n="methodLegend">كيف تفضّل استكمال الطلب؟</legend>
+                  <label class="method-card">
+                    <input type="radio" name="method" value="assistant">
+                    <span class="method-radio"></span>
+                    <span class="method-content">
+                      <span class="method-title"><span data-i18n="assistantMethod">محادثة مع مساعد ذكي</span><em data-i18n="recommended">موصى به</em><span class="method-spark">✦</span></span>
+                      <span data-i18n="assistantDescription">تحدث معه ليجمع تفاصيل طلبك خطوة بخطوة.</span>
+                    </span>
+                  </label>
+                  <label class="method-card">
+                    <input type="radio" name="method" value="guided" checked>
+                    <span class="method-radio"></span>
+                    <span class="method-content">
+                      <span class="method-title"><span data-i18n="guidedMethod">تعبئة النموذج</span></span>
+                      <span data-i18n="guidedDescription">أجب عن الحقول المنظمة بنفسك دون محادثة ذكية.</span>
+                    </span>
+                  </label>
+                </fieldset>
+                <div class="assistant-chat" id="assistant-chat" hidden>
+                  <h3 data-i18n="assistantChatTitle">المحادثة مع المساعد الذكي</h3>
+                  <p class="assistant-chat-privacy" data-i18n="assistantChatPrivacy">عند اختيار المحادثة، تُرسل رسائلك وتفاصيل الموضوع إلى Google Gemini لتوليد الردود، وتُحفظ في سجل حسابك ليطلع عليها المالك والإدارة إذا منحها المالك الصلاحية.</p>
+                  <label class="check-label assistant-consent"><input type="checkbox" id="assistant-consent"><span class="custom-check"></span><span data-i18n="assistantConsent">أوافق على معالجة رسائل المحادثة بواسطة Google Gemini وحفظها في سجل حسابي.</span></label>
+                  <button class="primary-button assistant-start" type="button" id="assistant-chat-start" data-i18n="startAssistantChat">ابدأ المحادثة</button>
+                  <div class="assistant-chat-log" id="assistant-chat-log" hidden></div>
+                  <div class="assistant-chat-composer" id="assistant-chat-composer" hidden>
+                    <textarea id="assistant-chat-input" placeholder="اكتب رسالتك..." rows="2"></textarea>
+                    <button class="primary-button" type="button" id="assistant-chat-send" data-i18n="sendChatMessage">إرسال</button>
+                  </div>
+                  <p class="assistant-chat-error" id="assistant-chat-error" hidden></p>
+                </div>
+                <p class="branch-prompt" id="branch-prompt"></p>
+                <div class="field-grid detail-fields guided-only">
+                  <label class="field full-width"><span id="focus-label" data-i18n="focusDetails">نقاط أو مفاهيم للتركيز عليها</span><textarea name="focusDetails" rows="3" maxlength="2000"></textarea></label>
+                  <label class="field"><span id="audience-label" data-i18n="audience">الصف أو الفئة المستهدفة</span><input name="audience" type="text" maxlength="200"></label>
+                  <label class="field"><span data-i18n="duration">مدة المحتوى التقريبية</span>
+                    <select name="duration">
+                      <option value="" data-i18n="notSure">لست متأكدًا</option>
+                      <option value="5">5 دقائق</option>
+                      <option value="10">10 دقائق</option>
+                      <option value="15">15 دقيقة</option>
+                      <option value="20">20 دقيقة</option>
+                      <option value="30">30 دقيقة</option>
+                      <option value="custom" data-i18n="durationCustom">مدة أخرى</option>
+                    </select>
+                  </label>
+                  <label class="field" id="slide-count-field" hidden><span data-i18n="slideCount">عدد الشرائح التقريبي</span>
+                    <select name="slideCount">
+                      <option value="" data-i18n="notSure">لست متأكدًا</option>
+                      <option value="5">5</option>
+                      <option value="8">8</option>
+                      <option value="10">10</option>
+                      <option value="15">15</option>
+                      <option value="20">20</option>
+                      <option value="custom" data-i18n="slidesCustom">عدد آخر</option>
+                    </select>
+                  </label>
+                  <label class="field"><span data-i18n="language">لغة المخرجات</span>
+                    <select name="presentationLanguage" required>
+                      <option value="ar" data-i18n="arabic">العربية</option>
+                      <option value="en" data-i18n="english">الإنجليزية</option>
+                    </select>
+                  </label>
+                  <label class="field" id="format-field" hidden><span data-i18n="format">صيغة العرض</span>
+                    <select name="format">
+                      <option value="pdf" data-i18n="pdfDefault">PDF (الافتراضي)</option>
+                      <option value="pptx" data-i18n="pptx">PowerPoint</option>
+                    </select>
+                  </label>
+                  <label class="field full-width"><span data-i18n="extraDetails">تفاصيل أو ملاحظات إضافية</span><textarea name="notes" rows="2" maxlength="2000"></textarea></label>
+                </div>
+
+                <div class="upload-section">
+                  <div class="section-heading">
+                    <span class="upload-icon">↑</span>
+                    <span><strong data-i18n="attachments">مرفقات تساعدنا</strong><small data-i18n="attachmentsOptional">اختيارية — ننصح بإضافة ملف أو أكثر عن الموضوع</small></span>
+                  </div>
+                  <div class="drop-zone" id="drop-zone">
+                    <input type="file" id="attachments" multiple accept=".pdf,.txt,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg">
+                    <span class="upload-cloud">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 20h16"/></svg>
+                    </span>
+                    <strong data-i18n="dropFiles">اسحب الملفات إلى هنا أو اختر من جهازك</strong>
+                    <small data-i18n="fileRules">حتى 10 ملفات، بحد 50 MB للملف الواحد. لا يمكن رفع الفيديو.</small>
+                  </div>
+                  <div class="file-list" id="file-list"></div>
+                  <p class="file-error" id="file-error" hidden></p>
+                </div>
+
+                <div class="video-section">
+                  <div class="section-heading">
+                    <span class="video-icon">▶</span>
+                    <span><strong data-i18n="videoSection">هل تحتاج إلى الإشارة لفيديو؟</strong><small data-i18n="videoHelp">الفيديو لا يُرفع كملف؛ يمكنك لصق رابطه ليراجعه الفريق مع طلبك.</small></span>
+                  </div>
+                  <div class="video-choice">
+                    <label class="radio-label"><input type="radio" name="videoOption" value="none" checked><span data-i18n="noVideo">لا يوجد</span></label>
+                    <label class="radio-label"><input type="radio" name="videoOption" value="link"><span data-i18n="videoLinkOption">لدي رابط فيديو</span></label>
+                    <label class="radio-label"><input type="radio" name="videoOption" value="review"><span data-i18n="videoReviewOption">طلب مراجعة فريق</span></label>
+                  </div>
+                  <div class="video-link-wrap" id="video-link-wrap" hidden>
+                    <input type="url" id="video-url" name="videoUrl" placeholder="https://..." dir="ltr">
+                    <button class="paste-button" type="button" id="paste-video"><span data-i18n="paste">لصق</span></button>
+                    <span class="field-error" id="video-error"></span>
+                  </div>
+                  <p class="video-review-hint" id="video-review-hint" hidden data-i18n="videoReviewHint">سيُرفق طلب مراجعة الفيديو بهذا الطلب ليراجعه الفريق يدويًا.</p>
+                </div>
+
+                <div class="consent-box">
+                  <label class="check-label"><input type="checkbox" name="consent"><span class="custom-check"></span><span data-i18n="consentText">أوافق على استخدام بياناتي ومرفقاتي لمراجعة طلبي وإعداد المخرجات المطلوبة، والتواصل معي عبر البريد الإلكتروني.</span></label>
+                  <span class="field-error" data-error-for="consent"></span>
+                </div>
+
+                <div class="form-actions">
+                  <button class="secondary-button" type="button" data-previous><span data-i18n="previous">السابق</span></button>
+                  <button class="primary-button" type="button" id="to-review"><span data-i18n="reviewRequest">مراجعة الطلب</span> ←</button>
+                </div>
+              </div>
+
+              <div class="form-page" data-page="3">
+                <div class="form-heading">
+                  <span class="form-step-label" data-i18n="thirdStepLabel">الخطوة ٣ من ٣</span>
+                  <h2 data-i18n="reviewHeading">ألقِ نظرة أخيرة</h2>
+                  <p data-i18n="reviewSubheading">تأكد من التفاصيل قبل إرسال طلبك.</p>
+                </div>
+                <div class="review-content" id="review-content"></div>
+                <div class="review-caveat">
+                  <span>💡</span>
+                  <span data-i18n="previewOnly">سيُحفظ الطلب ومرفقاته في مجلد خاص على Google Drive بعد اكتمال إعداد الربط.</span>
+                </div>
+                <p class="submission-error" id="submission-error" hidden></p>
+                <div class="form-actions">
+                  <button class="secondary-button" type="button" data-previous><span data-i18n="editDetails">تعديل التفاصيل</span></button>
+                  <button class="primary-button" type="submit"><span data-i18n="sendRequest">إرسال الطلب</span></button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="success-screen" hidden>
+        <div class="success-screen">
+          <div class="success-icon">✓</div>
+          <span class="form-step-label" data-i18n="requestReceived">تم استلام الطلب</span>
+          <h1 data-i18n="successTitle">شكرًا لك!</h1>
+          <p><span data-i18n="successMessage">وصل طلبك إلى مجلد العمل على Google Drive. راجع بريدك للاحتفاظ برقم الطلب.</span></p>
+          <p class="request-number" id="request-number" hidden></p>
+          <div class="social-contact">
+            <h2 data-i18n="socialHeading">تواصل مع مستر كركر</h2>
+            <p data-i18n="socialDescription">تجدنا على منصات التواصل بالاسم نفسه:</p>
+            <div class="social-links" id="social-links"></div>
+            <span class="social-handle">@teacherkarkar</span>
+          </div>
+          <div class="demo-callout">
+            <strong data-i18n="driveSavedTitle">تم الحفظ في Drive</strong>
+            <span data-i18n="driveSavedText">حُفظ طلبك ومرفقاته في مجلد خاص، وسيُراجَع من الإدارة قبل تجهيز العرض.</span>
+          </div>
+          <button class="secondary-button home-button" type="button" id="go-home"><span>←</span><span data-i18n="goHome">العودة للرئيسية</span></button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>© <span id="year"></span> Teacher Karkar</span>
+      <span data-i18n="footerNote">هذا الموقع يتبع سلسلة برامج مستر كركر</span>
+      <a class="feedback-link" href="#" data-feedback-link aria-disabled="true">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-5 4v-4.6a2.5 2.5 0 0 1-1-1.9v-8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 8h8M8 11h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span data-i18n="feedbackLabel">اقتراحات وشكاوى</span>
+        <small data-feedback-soon data-i18n="feedbackSoon">قريبًا</small>
+      </a>
+    </footer>
+
+    <script src="accounts.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
